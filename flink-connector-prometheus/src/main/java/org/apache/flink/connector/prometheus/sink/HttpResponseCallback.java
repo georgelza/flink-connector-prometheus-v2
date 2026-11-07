@@ -39,6 +39,7 @@
 package org.apache.flink.connector.prometheus.sink;
 
 import org.apache.flink.annotation.Internal;
+import org.apache.flink.connector.base.sink.writer.ResultHandler;
 import org.apache.flink.connector.prometheus.sink.PrometheusSinkConfiguration.OnErrorBehavior;
 import org.apache.flink.connector.prometheus.sink.errorhandling.PrometheusSinkWriteException;
 import org.apache.flink.connector.prometheus.sink.http.RemoteWriteResponseType;
@@ -50,9 +51,7 @@ import org.apache.hc.core5.concurrent.FutureCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.function.Consumer;
 
 import static org.apache.flink.connector.prometheus.sink.http.RemoteWriteResponseClassifier.classify;
 
@@ -86,7 +85,7 @@ class HttpResponseCallback implements FutureCallback<SimpleHttpResponse> {
 
     private final int timeSeriesCount;
     private final long sampleCount;
-    private final Consumer<List<Types.TimeSeries>> reQueuedResult;
+    private final ResultHandler<Types.TimeSeries> reQueuedResult;
     private final SinkMetricsCallback metricsCallback;
     private final PrometheusSinkConfiguration.SinkWriterErrorHandlingBehaviorConfiguration
             errorHandlingBehaviorConfig;
@@ -97,7 +96,7 @@ class HttpResponseCallback implements FutureCallback<SimpleHttpResponse> {
             SinkMetricsCallback metricsCallback,
             PrometheusSinkConfiguration.SinkWriterErrorHandlingBehaviorConfiguration
                     errorHandlingBehaviorConfig,
-            Consumer<List<Types.TimeSeries>> reQueuedResult) {
+            ResultHandler<Types.TimeSeries> reQueuedResult) {
         this.timeSeriesCount = timeSeriesCount;
         this.sampleCount = sampleCount;
         this.reQueuedResult = reQueuedResult;
@@ -117,7 +116,7 @@ class HttpResponseCallback implements FutureCallback<SimpleHttpResponse> {
     @Override
     public void completed(SimpleHttpResponse response) {
         // Never re-queue requests
-        reQueuedResult.accept(Collections.emptyList());
+        reQueuedResult.complete();   // 2.x ResultHandler: no re-queue, this request is done
 
         RemoteWriteResponseType responseType = classify(response);
         switch (responseType) {

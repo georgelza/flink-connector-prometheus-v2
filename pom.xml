@@ -30,7 +30,7 @@ under the License.
 
     <groupId>org.apache.flink</groupId>
     <artifactId>flink-connector-prometheus-parent</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>2.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Flink : Connectors : Prometheus : Parent</name>
@@ -54,6 +54,22 @@ under the License.
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!--
+          JAVA 17, ALIGNED WITH THE FLINK RUNTIME THIS CONNECTOR RUNS IN.
+
+          The Flink parent POM sets `target.java.version` to 1.8, which is Flink's
+          build-time baseline. But Flink 1.20 does not RUN on Java 8 — it runs on
+          Java 11 or 17 — and the image this stack deploys is
+          flink:1.20.1-scala_2.12-java17. Compiling to 1.8 while running on 17 is a
+          split with no benefit: no bytecode-level compatibility is needed with a
+          Java-8 cluster, because this stack has none.
+
+          CONSEQUENCE, stated plainly: this jar will NOT load on a Flink cluster
+          running Java 11. If that ever becomes a requirement, drop this override
+          back to 11 (and keep the MQTT connector at 17 only if its cluster is 17
+          too — the two should agree with the image, not with each other).
+        -->
+        <target.java.version>17</target.java.version>
+        <!--
           SPOTLESS'S FORMAT CHECK IS OFF, DELIBERATELY.
 
           This fork carries an attribution header ABOVE the ASF licence block
@@ -69,7 +85,7 @@ under the License.
           Reformatting is not disabled: `spotless:apply` still works if you run it.
         -->
         <spotless.check.skip>true</spotless.check.skip>
-        <flink.version>1.20.1</flink.version>
+        <flink.version>2.2.1</flink.version>
         <protobuf.version>3.22.2</protobuf.version>
         <apache.httpcomponents.version>5.3</apache.httpcomponents.version>
         <apache.httpcomponents.client.version>5.3.1</apache.httpcomponents.client.version>

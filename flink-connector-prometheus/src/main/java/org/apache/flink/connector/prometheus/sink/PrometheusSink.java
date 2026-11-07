@@ -39,6 +39,8 @@
 package org.apache.flink.connector.prometheus.sink;
 
 import org.apache.flink.annotation.PublicEvolving;
+import org.apache.flink.api.connector.sink2.StatefulSinkWriter;
+import org.apache.flink.api.connector.sink2.WriterInitContext;
 import org.apache.flink.connector.base.sink.AsyncSinkBase;
 import org.apache.flink.connector.base.sink.writer.BufferedRequestState;
 import org.apache.flink.connector.base.sink.writer.ElementConverter;
@@ -126,7 +128,7 @@ public class PrometheusSink<IN> extends AsyncSinkBase<IN, Types.TimeSeries> {
 
     @Override
     public StatefulSinkWriter<IN, BufferedRequestState<Types.TimeSeries>> createWriter(
-            InitContext initContext) {
+            WriterInitContext initContext) {
         SinkMetricsCallback metricsCallback =
                 new SinkMetricsCallback(
                         SinkMetrics.registerSinkMetrics(
@@ -152,7 +154,7 @@ public class PrometheusSink<IN> extends AsyncSinkBase<IN, Types.TimeSeries> {
 
     @Override
     public StatefulSinkWriter<IN, BufferedRequestState<Types.TimeSeries>> restoreWriter(
-            InitContext initContext,
+            WriterInitContext initContext,
             Collection<BufferedRequestState<Types.TimeSeries>> recoveredState) {
         SinkMetricsCallback metricsCallback =
                 new SinkMetricsCallback(
